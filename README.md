@@ -24,8 +24,6 @@ PCB Designs was created in KiCad an Hardware Prototype in SolidWorks
 
 #Web Page
 The website is quite basic, and due to time constraints, it was not possible to make the wildfires in your localities transmit in real time. However, it is planned that this can be done in the future. This will be explained in detail in the section on *Possible improvements*.
-https://cdn.discordapp.com/attachments/1159278136551297086/1160673021082738718/image.png?ex=653583fc&is=65230efc&hm=cec8e37b61aed8579a79955e96384718ee03b8d473cfebb561a48514eab6b486&
-
-https://cdn.discordapp.com/attachments/1159278136551297086/1160673077055717516/image.png?ex=65358409&is=65230f09&hm=89b35a722d11d749ccb078e1414b329cce45796f0138a7df38b3f6a68e46378f&
-
-https://cdn.discordapp.com/attachments/1159278136551297086/1160673153782128801/image.png?ex=6535841c&is=65230f1c&hm=f18c48b30f75e4cf383711035fb56c18fe01b8201efe3dc5bcd5cbef9edef7fa&
+![WEB3](https://github.com/Fernando1San/Manhattan-Project-for-NASA-Space-Apps/assets/113205429/da1cf92b-8262-4ab3-8446-0585542cd7a4)
+![WEB1](https://github.com/Fernando1San/Manhattan-Project-for-NASA-Space-Apps/assets/113205429/7aae8021-392c-41c7-bc9e-c657b56aa2f4)
+![WEB2](https://github.com/Fernando1San/Manhattan-Project-for-NASA-Space-Apps/assets/113205429/e94de223-685d-447b-bb24-cc16933fa5f7)
