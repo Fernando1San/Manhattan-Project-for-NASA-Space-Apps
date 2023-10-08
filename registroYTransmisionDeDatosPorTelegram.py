@@ -20,31 +20,22 @@ def main():
     ubicacion = geolocator.reverse((latitud, longitud))
     return ubicacion.address
   
-  MAP_KEY = '724791d412a82892de4d71d974d5e727'
+  MAP_KEY = '724791d412a82892de4d71d974d5e727' #The Id for the NASA FIRMS API
 
-  CHAT_ID="@SpaceAppsFireAlarm" #ID del chat
+  CHAT_ID="@SpaceAppsFireAlarm" #ID del chat #Our chat ID
 
-  TOKEN = "6572209256:AAHG_HN9EbMMstm78xZysh0QzBwJzQfBGQ8" #token de la API de telegram
+  TOKEN = "6572209256:AAHG_HN9EbMMstm78xZysh0QzBwJzQfBGQ8" #token de la API de telegram #API telegram Token
 
   bot = telebot.TeleBot(TOKEN)
 
-  def enviarMensaje(mensaje):
+  def enviarMensaje(mensaje): #We send a message to the channel on telegram
       bot.send_message(CHAT_ID, mensaje) 
 
-  #We get the data from the
+  #We get the data from the API for Mexico
   mex_url = 'https://firms.modaps.eosdis.nasa.gov/api/country/csv/' + MAP_KEY + '/VIIRS_SNPP_NRT/MEX/1/' + FECHA
   mex_data = pd.read_csv(mex_url)
   #print(mex_data)
   print('Number of Possible fires: ', len(mex_data))
-  #####################################################################################################################
-  #Esta parte del codigo seria para limitar la busqueda de Mexio unicamente a Xalapa
-  #Como no hay nada no lo vamos a usar por ahora
-  #This part of the code is to limit MexicoOnly to a zone near Xalapa
-  #Becuasetheres nothing,we are not going to use it for demonstration porpuses
-  #extent = [19.30,-97.332 ,19.832,-96.502]
-  #df_xalapa = mex_data[(mex_data['longitude'] >= extent[0]) & (mex_data['latitude'] >= extent[1]) & (mex_data['longitude'] <= extent[2]) & (mex_data['latitude'] <= extent[3])].copy()
-  #print(df_xalapa)
-  #####################################################################################################################
 
   #Filtred data
   filtred_mex_data = mex_data[(mex_data['confidence'] == 'n') | (mex_data['confidence'] == 'h')]
@@ -76,7 +67,7 @@ def main():
   puntero = 0
   while puntero < len(coordenadas):
       latitud, longitud = coordenadas[puntero]
-      ciudad= encontrar_ciudad_cercana(latitud, longitud)
+      ciudad= encontrar_ciudad_cercana(latitud, longitud) #Via this function and some libraries I locate the nearest city to that latitude an longitud
       horas_actual=horas.iloc[puntero]
       mensaje = f'*¡¡ALERTA DE INCENDIO!!* Se ha detectado un posible incendio cerca de la siguiente localidad/ciudad: {ciudad}. La hora del sinsiestro registrado es {horas_actual}'
       enviarMensaje(mensaje)
@@ -84,7 +75,7 @@ def main():
 
 if __name__ == "__main__":
 
-  main()
+  main() 
   
   schedule.every(30).minutes.do(main)
 
