@@ -21,7 +21,7 @@ PCB Designs was created in KiCad an Hardware Prototype in SolidWorks
 <img width="762" alt="CAD3" src="https://github.com/Fernando1San/Manhattan-Project-for-NASA-Space-Apps/assets/113205429/816fbc6c-1030-49b8-afb0-1c8032cbfa12">
 <img width="740" alt="CAD2" src="https://github.com/Fernando1San/Manhattan-Project-for-NASA-Space-Apps/assets/113205429/342309a4-cc30-48ad-82b3-dcc47e919691">
 
-
+# For a Better Explanation You can check the pdf or the web page
 # Web Page https://manhattan.courses/#
 The website is quite basic, and due to time constraints, it was not possible to make the wildfires in your localities transmit in real time. However, it is planned that this can be done in the future. This will be explained in detail in the section on *Possible improvements*.
 ![WEB3](https://github.com/Fernando1San/Manhattan-Project-for-NASA-Space-Apps/assets/113205429/da1cf92b-8262-4ab3-8446-0585542cd7a4)
