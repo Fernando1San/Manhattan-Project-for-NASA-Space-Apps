@@ -4,14 +4,19 @@ from datetime import datetime, timedelta
 import time
 import schedule
 from geopy.geocoders import Nominatim
+import pytz
+
+incendios_notificados = set()
 
 def main():
   
+  global incendios_notificados
+  
   fecha_actual = datetime.now()
 
-  fecha_menos_un_dia = fecha_actual - timedelta(days=1)
+  fecha_menos_un_dia = fecha_actual
 
-  FECHA = fecha_actual.strftime("%Y-%m-%d")
+  FECHA = fecha_menos_un_dia.strftime("%Y-%m-%d")
   
   print(FECHA)
   
@@ -20,22 +25,32 @@ def main():
     ubicacion = geolocator.reverse((latitud, longitud))
     return ubicacion.address
   
-  MAP_KEY = '724791d412a82892de4d71d974d5e727' #The Id for the NASA FIRMS API
+  MAP_KEY = '724791d412a82892de4d71d974d5e727'
 
-  CHAT_ID="@SpaceAppsFireAlarm" #ID del chat #Our chat ID
+  CHAT_ID="@SpaceAppsFireAlarm" #ID del chat
 
-  TOKEN = "6572209256:AAHG_HN9EbMMstm78xZysh0QzBwJzQfBGQ8" #token de la API de telegram #API telegram Token
+  TOKEN = "6572209256:AAHG_HN9EbMMstm78xZysh0QzBwJzQfBGQ8" #token de la API de telegram
 
   bot = telebot.TeleBot(TOKEN)
 
-  def enviarMensaje(mensaje): #We send a message to the channel on telegram
+  def enviarMensaje(mensaje):
+      time.sleep(5)
       bot.send_message(CHAT_ID, mensaje) 
 
-  #We get the data from the API for Mexico
+  #We get the data from the
   mex_url = 'https://firms.modaps.eosdis.nasa.gov/api/country/csv/' + MAP_KEY + '/VIIRS_SNPP_NRT/MEX/1/' + FECHA
   mex_data = pd.read_csv(mex_url)
   #print(mex_data)
   print('Number of Possible fires: ', len(mex_data))
+  #####################################################################################################################
+  #Esta parte del codigo seria para limitar la busqueda de Mexio unicamente a Xalapa
+  #Como no hay nada no lo vamos a usar por ahora
+  #This part of the code is to limit MexicoOnly to a zone near Xalapa
+  #Becuasetheres nothing,we are not going to use it for demonstration porpuses
+  #extent = [19.30,-97.332 ,19.832,-96.502]
+  #df_xalapa = mex_data[(mex_data['longitude'] >= extent[0]) & (mex_data['latitude'] >= extent[1]) & (mex_data['longitude'] <= extent[2]) & (mex_data['latitude'] <= extent[3])].copy()
+  #print(df_xalapa)
+  #####################################################################################################################
 
   #Filtred data
   filtred_mex_data = mex_data[(mex_data['confidence'] == 'n') | (mex_data['confidence'] == 'h')]
@@ -43,6 +58,8 @@ def main():
   #This would be the fires
   #print('Mexico subset contains', len(filtred_mex_data), 'fires.')
 
+  #print(filtred_mex_data)
+  
   #here I print and get the latitudes and longitudes
   coordenadas = [(row['latitude'], row['longitude']) for index, row in filtred_mex_data.iterrows()]
 
@@ -60,26 +77,31 @@ def main():
   filtred_mex_data['acq_time'] = filtred_mex_data['acq_time'].astype(str).str.zfill(4)
   # Extrae las horas y minutos y crea una columna acq_datetime solo con la hora en formato 'H:M'
   filtred_mex_data['acq_datetime'] = pd.to_datetime(filtred_mex_data['acq_time'], format='%H%M').dt.strftime('%H:%M')
-  # Extrae las horas en el formato 'H:M' y guárdalas en un vector
+  # Convierte las horas de GMT/UTC a la hora de México
+  tz_mexico = pytz.timezone('America/Mexico_City')
+  filtred_mex_data['acq_datetime'] = pd.to_datetime(filtred_mex_data['acq_datetime'], format='%H:%M').dt.tz_localize('UTC').dt.tz_convert(tz_mexico)
   horas = filtred_mex_data['acq_datetime']
   #print(horas.tolist())
 
-  puntero = 0
-  while puntero < len(coordenadas):
-      latitud, longitud = coordenadas[puntero]
-      ciudad= encontrar_ciudad_cercana(latitud, longitud) #Via this function and some libraries I locate the nearest city to that latitude an longitud
-      horas_actual=horas.iloc[puntero]
-      mensaje = f'*¡¡ALERTA DE INCENDIO!!* Se ha detectado un posible incendio cerca de la siguiente localidad/ciudad: {ciudad}. La hora del sinsiestro registrado es {horas_actual}'
-      enviarMensaje(mensaje)
-      puntero += 1
+  puntero = 0  # Reinicia el puntero a 0
+  for puntero in range(len(coordenadas)):
+    latitud, longitud = coordenadas[puntero]
+    if (latitud, longitud) not in incendios_notificados:
+        ciudad = encontrar_ciudad_cercana(latitud, longitud)
+        horas_actual = horas.iloc[puntero].strftime('%H:%M')
+        mensaje = f'*¡¡ALERTA DE INCENDIO!!* Se ha detectado un posible incendio cerca de la siguiente localidad/ciudad: {ciudad}. La hora del siniestro registrado es {horas_actual}'
+        enviarMensaje(mensaje)
+        incendios_notificados.add((latitud, longitud))  # Agrega las coordenadas al conjunto de incendios notificados
+        
+  print("se terminaron de imprimir los mensajes")
 
 if __name__ == "__main__":
 
-  main() 
+  main()
   
   schedule.every(30).minutes.do(main)
 
   # Ejecuta el programa de forma indefinida
   while True:
     schedule.run_pending()
-    time.sleep(1)
+    time.sleep(1) 
