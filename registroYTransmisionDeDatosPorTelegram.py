@@ -36,15 +36,6 @@ def main():
   mex_data = pd.read_csv(mex_url)
   #print(mex_data)
   print('Number of Possible fires: ', len(mex_data))
-  #####################################################################################################################
-  #Esta parte del codigo seria para limitar la busqueda de Mexio unicamente a Xalapa
-  #Como no hay nada no lo vamos a usar por ahora
-  #This part of the code is to limit MexicoOnly to a zone near Xalapa
-  #Becuasetheres nothing,we are not going to use it for demonstration porpuses
-  #extent = [19.30,-97.332 ,19.832,-96.502]
-  #df_xalapa = mex_data[(mex_data['longitude'] >= extent[0]) & (mex_data['latitude'] >= extent[1]) & (mex_data['longitude'] <= extent[2]) & (mex_data['latitude'] <= extent[3])].copy()
-  #print(df_xalapa)
-  #####################################################################################################################
 
   #Filtred data
   filtred_mex_data = mex_data[(mex_data['confidence'] == 'n') | (mex_data['confidence'] == 'h')]
