@@ -4,19 +4,14 @@ from datetime import datetime, timedelta
 import time
 import schedule
 from geopy.geocoders import Nominatim
-import pytz
-
-incendios_notificados = set()
 
 def main():
   
-  global incendios_notificados
-  
   fecha_actual = datetime.now()
 
-  fecha_menos_un_dia = fecha_actual
+  fecha_menos_un_dia = fecha_actual - timedelta(days=1)
 
-  FECHA = fecha_menos_un_dia.strftime("%Y-%m-%d")
+  FECHA = fecha_actual.strftime("%Y-%m-%d")
   
   print(FECHA)
   
@@ -34,7 +29,6 @@ def main():
   bot = telebot.TeleBot(TOKEN)
 
   def enviarMensaje(mensaje):
-      time.sleep(5)
       bot.send_message(CHAT_ID, mensaje) 
 
   #We get the data from the
@@ -58,8 +52,6 @@ def main():
   #This would be the fires
   #print('Mexico subset contains', len(filtred_mex_data), 'fires.')
 
-  #print(filtred_mex_data)
-  
   #here I print and get the latitudes and longitudes
   coordenadas = [(row['latitude'], row['longitude']) for index, row in filtred_mex_data.iterrows()]
 
@@ -77,23 +69,18 @@ def main():
   filtred_mex_data['acq_time'] = filtred_mex_data['acq_time'].astype(str).str.zfill(4)
   # Extrae las horas y minutos y crea una columna acq_datetime solo con la hora en formato 'H:M'
   filtred_mex_data['acq_datetime'] = pd.to_datetime(filtred_mex_data['acq_time'], format='%H%M').dt.strftime('%H:%M')
-  # Convierte las horas de GMT/UTC a la hora de México
-  tz_mexico = pytz.timezone('America/Mexico_City')
-  filtred_mex_data['acq_datetime'] = pd.to_datetime(filtred_mex_data['acq_datetime'], format='%H:%M').dt.tz_localize('UTC').dt.tz_convert(tz_mexico)
+  # Extrae las horas en el formato 'H:M' y guárdalas en un vector
   horas = filtred_mex_data['acq_datetime']
   #print(horas.tolist())
 
-  puntero = 0  # Reinicia el puntero a 0
-  for puntero in range(len(coordenadas)):
-    latitud, longitud = coordenadas[puntero]
-    if (latitud, longitud) not in incendios_notificados:
-        ciudad = encontrar_ciudad_cercana(latitud, longitud)
-        horas_actual = horas.iloc[puntero].strftime('%H:%M')
-        mensaje = f'*¡¡ALERTA DE INCENDIO!!* Se ha detectado un posible incendio cerca de la siguiente localidad/ciudad: {ciudad}. La hora del siniestro registrado es {horas_actual}'
-        enviarMensaje(mensaje)
-        incendios_notificados.add((latitud, longitud))  # Agrega las coordenadas al conjunto de incendios notificados
-        
-  print("se terminaron de imprimir los mensajes")
+  puntero = 0
+  while puntero < len(coordenadas):
+      latitud, longitud = coordenadas[puntero]
+      ciudad= encontrar_ciudad_cercana(latitud, longitud)
+      horas_actual=horas.iloc[puntero]
+      mensaje = f'*¡¡ALERTA DE INCENDIO!!* Se ha detectado un posible incendio cerca de la siguiente localidad/ciudad: {ciudad}. La hora del sinsiestro registrado es {horas_actual}'
+      enviarMensaje(mensaje)
+      puntero += 1
 
 if __name__ == "__main__":
 
@@ -104,4 +91,4 @@ if __name__ == "__main__":
   # Ejecuta el programa de forma indefinida
   while True:
     schedule.run_pending()
-    time.sleep(1) 
+    time.sleep(1)
